@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{.Values.metadata.name}}
+
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.metadata.name }}
+  serviceName: {{.Values.metadata.name}}-service
+  replicas: {{ .Values.database.replicas }}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.metadata.name}}
+    spec:
+     volumes:
+        - name: {{ .Values.metadata.name}}-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.metadata.name }}-claim 
+        - name: neo4j-{{.Values.metadata.name}}        
+          secret:
+            secretName: {{ .Values.metadata.name}}-secret
+     containers:
+      - name:  "test-container"
+        image: {{ .Values.database.image }}
+        imagePullPolicy: {{ .Values.database.pullPolicy }}
+        ports:
+            - containerPort: {{.Values.database.port}}
+              name: {{.Values.database.service_name}} 
+        volumeMounts:
+          - name: {{.Values.metadata.name}}-volume
+            mountPath: /root/conf/
+
+
+        env:
+          - name: NEO4J_dbms_jvm_additional
+            value: {{ .Values.database.jvm.additional | quote}}
+          - name: SERVICE_NEO4J_ADMIN
+            value: "{{ .Release.Name }}-admin.{{ .Release.Namespace }}.svc"
+          - name: SERVICE_NEO4J_INTERNALS
+            value: "{{ .Release.Name }}-internals.{{ .Release.Namespace }}.svc"
+          - name: SERVICE_NEO4J
+            value: "{{ .Release.Name }}.{{ .Release.Namespace }}.svc"
+          - name: NEO4J_AUTH
+            value: {{.Values.database.auth | quote}}
+          - name: NEO4J_PASSWORD
+            value: /root/conf
