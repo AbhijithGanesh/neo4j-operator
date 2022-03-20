@@ -5,10 +5,14 @@ database:
   auth: none
   image: neo4j:latest
   pullPolicy: "Always"
-  replicas: 3
+  replicas: 1
   port: 7474
   jvm:
-    additional: "-Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false  -Dcom.sun.management.jmxremote.access.file=$HOME/conf/jmx.access -Dcom.sun.management.jmxremote.port=3637"
+    # -Dcom.sun.management.jmxremote.password.file=/etc/password/jmx.password\
+    additional: "-Dcom.sun.management.jmxremote.authenticate=false \
+      -Dcom.sun.management.jmxremote.ssl=false \
+      -Dcom.sun.management.jmxremote.access.file=$HOME/conf/jmx.access \
+      -Dcom.sun.management.jmxremote.port=3637"
   service_name: neo4j-operator
   storageclass: neo4j-storage-class
   storagesize: 1Gi

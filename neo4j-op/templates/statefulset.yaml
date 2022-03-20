@@ -18,13 +18,23 @@ spec:
         - name: {{ .Values.metadata.name}}-volume
           persistentVolumeClaim:
             claimName: {{ .Values.metadata.name }}-claim 
-        - name: neo4j-{{.Values.metadata.name}}        
-          secret:
-            secretName: {{ .Values.metadata.name}}-secret
+        - name: neo4j-{{.Values.metadata.name}}-config        
+          configMap:
+            defaultMode: 384
+            name: {{ .Release.Name }}-configmap
+            items:
+              - key: Password
+                path: jmx.password
+
      containers:
       - name:  "test-container"
         image: {{ .Values.database.image }}
         imagePullPolicy: {{ .Values.database.pullPolicy }}
+        volumeMounts:
+          - name: neo4j-{{.Values.metadata.name}}-config    
+            mountPath: /etc/password/
+
+
         ports:
             - containerPort: {{.Values.database.port}}
               name: {{.Values.database.service_name}} 
@@ -39,5 +49,4 @@ spec:
             value: "{{ .Release.Name }}.{{ .Release.Namespace }}.svc"
           - name: NEO4J_AUTH
             value: {{.Values.database.auth | quote}}
-          - name: NEO4J_PASSWORD
-            value: {{ .Values.database.password | b64enc}}
+
