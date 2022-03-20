@@ -28,11 +28,6 @@ spec:
         ports:
             - containerPort: {{.Values.database.port}}
               name: {{.Values.database.service_name}} 
-        volumeMounts:
-          - name: {{.Values.metadata.name}}-volume
-            mountPath: /root/conf/
-
-
         env:
           - name: NEO4J_dbms_jvm_additional
             value: {{ .Values.database.jvm.additional | quote}}
@@ -45,4 +40,4 @@ spec:
           - name: NEO4J_AUTH
             value: {{.Values.database.auth | quote}}
           - name: NEO4J_PASSWORD
-            value: /root/conf
+            value: {{ .Values.database.password | b64enc}}
